@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saree Inventory Q&A</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    background:
+    url("bg-texture.jpg"),
+    linear-gradient(135deg, #f6c4e9 50%, #bf8fef 100%);
+
+background-blend-mode: overlay;
+background-size: cover, cover;
+background-position: center, center;
+
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 50px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+h1 {
+    font-family: 'Playfair Display', Arial, sans-serif;
+    
+    color: #ec6fb4;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+    text-align: center;
+}
+
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            
+
+        }
+
+        .setup-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .setup-info strong {
+            color: #856404;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #eb1882;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: linear-gradient(135deg, #e88fb1 0%, #ec6fb4 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .response-section.show {
+            display: block;
+        }
+
+        .response-title {
+            color: #c345f1;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .response-content {
+            color: #333;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .response-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .response-content table th,
+        .response-content table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .response-content table th {
+            background: #667eea;
+            color: white;
+        }
+
+        .response-content table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            border-radius: 5px;
+            color: #c33;
+        }
+
+        .success {
+            background: #efe;
+            border-left: 4px solid #4a4;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+
+
+        .examples {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .examples h3 {
+            color: #902976c1;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .examples ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .examples li {
+            padding: 5px 0;
+            color: #555;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .examples li:hover {
+            color: #667eea;
+        }
+
+        .examples li::before {
+            content: "🔻";
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Saree Assistant</h1>
+        
+
+        <p class="subtitle">Ask questions about our 13,000+ saree collection</p>
+
+
+
+
+
+        <div class="examples">
+            <h3>Example Questions (click to use):</h3>
+            <ul>
+                <li onclick="setQuestion(this)">How many cotton sarees are there?</li>
+                <li onclick="setQuestion(this)">Show me silk sarees under 5000</li>
+                <li onclick="setQuestion(this)">What are the reasons for non purchase?</li>
+                <li onclick="setQuestion(this)">How many red Banarasi sarees?</li>
+                <li onclick="setQuestion(this)">Show me sarees between 3000 and 7000</li>
+                <li onclick="setQuestion(this)">Count of sarees by region</li>
+            </ul>
+        </div>
+
+        <div class="input-section">
+            <label for="question">Your Question:</label>
+            <textarea id="question" placeholder="e.g., How many silk sarees are under 10000 rupees?"></textarea>
+        </div>
+
+        <button id="submitBtn" onclick="askQuestion()">Ask Question</button>
+
+        <div id="responseSection" class="response-section">
+            <div class="response-title">Response:</div>
+            <div id="responseContent" class="response-content"></div>
+        </div>
+    </div>
+
+    <script>
+        function setQuestion(element) {
+            document.getElementById('question').value = element.textContent;
+        }
+
+        async function askQuestion() {
+            const webhookUrl = "http://localhost:5678/webhook/sareechatbot";
+
+            const question = document.getElementById('question').value.trim();
+            const responseSection = document.getElementById('responseSection');
+            const responseContent = document.getElementById('responseContent');
+            const submitBtn = document.getElementById('submitBtn');
+
+
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            responseSection.classList.add('show');
+            responseContent.innerHTML = '<div class="loading">⏳ Analyzing saree inventory data...</div>';
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chatInput: question
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Display the response
+                let displayText = '';
+                if (typeof data === 'string') {
+                    displayText = data;
+                } else if (data.response) {
+                    displayText = data.response;
+                } else if (data.answer) {
+                    displayText = data.answer;
+                } else if (data.output) {
+                    displayText = data.output;
+                } else {
+                    displayText = JSON.stringify(data, null, 2);
+                }
+
+                // Format the response with better styling
+                const formattedResponse = formatResponse(displayText);
+                responseContent.innerHTML = `<div class="success">${formattedResponse}</div>`;
+
+            } catch (error) {
+                responseContent.innerHTML = `<div class="error">❌ <strong>Error:</strong> ${error.message}<br><br><strong>Troubleshooting:</strong><br>1. Make sure n8n is running at localhost:5678<br>2. Check your webhook URL is correct<br>3. Verify the workflow is ACTIVE<br>4. Check n8n Logs for detailed errors</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Ask Question';
+            }
+        }
+
+        function formatResponse(text) {
+            // Convert markdown-style tables to HTML if present
+            if (text.includes('|')) {
+                const lines = text.split('\n');
+                let inTable = false;
+                let html = '';
+                let tableHtml = '';
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.startsWith('|') && line.endsWith('|')) {
+                        if (!inTable) {
+                            inTable = true;
+                            tableHtml = '<table>';
+                        }
+                        
+                        const cells = line.split('|').filter(cell => cell.trim());
+                        
+                        // Skip separator lines (----)
+                        if (cells.every(cell => /^[-:]+$/.test(cell.trim()))) {
+                            continue;
+                        }
+                        
+                        // First row is header
+                        if (i === 0 || tableHtml === '<table>') {
+                            tableHtml += '<tr>';
+                            cells.forEach(cell => {
+                                tableHtml += `<th>${cell.trim()}</th>`;
+                            });
+                            tableHtml += '</tr>';
+                        } else {
+                            tableHtml += '<tr>';
+                            cells.forEach(cell => {
+                                tableHtml += `<td>${cell.trim()}</td>`;
+                            });
+                            tableHtml += '</tr>';
+                        }
+                    } else {
+                        if (inTable) {
+                            tableHtml += '</table>';
+                            html += tableHtml;
+                            tableHtml = '';
+                            inTable = false;
+                        }
+                        html += line + '\n';
+                    }
+                }
+                
+                if (inTable) {
+                    tableHtml += '</table>';
+                    html += tableHtml;
+                }
+                
+                return html || text;
+            }
+            
+            // Convert **bold** to <strong>
+            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            
+            return text;
+        }
+
+        // Allow Ctrl+Enter to submit
+        document.getElementById('question').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html>

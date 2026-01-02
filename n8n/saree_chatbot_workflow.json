@@ -1,0 +1,228 @@
+{
+  "name": "saree chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "fileSelector": "C:\\Users\\mahim\\.n8n-files\\excel new.xlsx",
+        "options": {
+          "dataPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9d8a9ec4-298e-4b30-8ea0-8847ed231fac",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "5e80702d-7d69-407a-be92-cc8c75426ee7",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User Question:{{ $('Webhook').first().json.body.chatInput }}\n\nData Context: {{ JSON.stringify($('Code in JavaScript').all().map(item => item.json)) }}",
+        "options": {
+          "systemMessage": "You are a helpful Saree Inventory Assistant specialized in analyzing saree data from a database of 13,000+ sarees.\n\n## YOUR ROLE:\n- Answer questions about saree inventory accurately\n- Provide counts, listings, and detailed information about sarees\n- Help users find sarees based on their preferences\n\n## DATA YOU RECEIVE:\nYou will receive pre-filtered data in this format:\n- `totalCount`: Total sarees in the database\n- `matchCount`: Number of sarees matching the user's query\n- `context`: Filtered data and summary statistics\n- `data` or `summary`: The actual matching saree records\n\n## HOW TO RESPOND:\n\n### For Counting Questions (e.g., \"How many red sarees?\"):\n- Use the `matchCount` value as your answer\n- Mention the total database size for context\n- Provide breakdown by categories if available in groupings\n\n### For Listing Questions (e.g., \"Show me silk sarees\"):\n- List the sarees from the `data` field\n- Format them in a readable table or list\n- If there are many results, summarize and show top examples\n\n### For Specific Queries (e.g., \"Cheapest Banarasi saree\"):\n- Analyze the filtered data to find the answer\n- Provide complete details of the matching item(s)\n\n### For Price-Related Questions:\n- Look at price fields in the data\n- Calculate averages, ranges, or find specific price points as asked\n\n## RESPONSE GUIDELINES:\n\n1. **Always state the count clearly** when asked \"how many\"\n   - Example: \"There are 234 red silk sarees in the inventory.\"\n\n2. **Be specific with numbers** - never say \"many\" or \"several\" if you have exact counts\n\n3. **Format data nicely** using:\n   - Tables for multiple items\n   - Bullet points for features\n   - Bold for important numbers\n\n4. **If no matches found**, say:\n   \"I couldn't find any sarees matching your criteria. The database has {totalCount} sarees. Try different keywords like [suggest alternatives].\"\n\n5. **If data seems incomplete**, mention:\n   \"Based on the {matchCount} matching records found...\"\n\n## EXAMPLE RESPONSES:\n\n**User**: How many cotton sarees are there?\n**You**: There are **847 cotton sarees** in our inventory of 13,000+ sarees. Here's the breakdown:\n- Plain Cotton: 312\n- Printed Cotton: 289\n- Cotton Silk Blend: 246\n\n**User**: Show red Banarasi sarees under 5000\n**You**: I found **23 red Banarasi sarees** priced under ₹5,000:\n\n| Name | Color | Price | Material |\n|------|-------|-------|----------|\n| Traditional Red Banarasi | Red | ₹4,500 | Pure Silk |\n| ... | ... | ... | ... |\n\n## IMPORTANT RULES:\n- Trust the matchCount - it represents ALL matching records from 13,000 rows\n- The data has been pre-filtered based on user's keywords\n- Always give complete, accurate answers based on the filtered data\n- If groupings/summary statistics are provided, use them for counting questions\n- Never make up data - only use what's provided in the context\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        896,
+        0
+      ],
+      "id": "a58e9749-7cce-4685-92b9-5c64570f72fa",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-robotics-er-1.5-preview",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        848,
+        288
+      ],
+      "id": "13299ae0-f928-4b78-9694-24370a1b9096",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "UD9Nu2td808tt1pG",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const userQuestion = $('Webhook').first().json.body.chatInput;\nconst allData = $('Extract from File').all();\n\n/* -------------------- CONFIG -------------------- */\n\nconst stopWords = [\n  'the','a','an','is','are','was','were','what','which','who','how',\n  'show','me','give','list','find','get','tell','about','of','in',\n  'on','at','to','for','with','and','or','any','some','can','you',\n  'i','want','need','please','do','does','have','has','saree','sarees'\n];\n\nconst aggregationKeywords = ['how many','count','total', 'reason', 'why', 'summary', 'breakdown'];\n\n/* -------------------- HELPERS -------------------- */\n\nconst needsAggregation = aggregationKeywords.some(k => userQuestion.includes(k));\n\nfunction extractKeywords(question) {\n  return question\n    .replace(/[^\\w\\s]/g,'')\n    .split(/\\s+/)\n    .filter(w => w.length > 2 && !stopWords.includes(w));\n}\n\nfunction extractPriceRange(question) {\n  const match =\n    question.match(/under\\s*(\\d+)/i) ||\n    question.match(/below\\s*(\\d+)/i) ||\n    question.match(/less than\\s*(\\d+)/i);\n\n  if (match) return { min: 0, max: parseInt(match[1]) };\n\n  const between = question.match(/between\\s*(\\d+)\\s*(?:and|to|-)\\s*(\\d+)/i);\n  if (between) return { min: parseInt(between[1]), max: parseInt(between[2]) };\n\n  return null;\n}\n\n/* -------------------- FILTER LOGIC -------------------- */\n\nconst keywords = extractKeywords(userQuestion);\nconst priceRange = extractPriceRange(userQuestion);\n\nconst filtered = allData.filter(item => {\n  const row = item.json;\n  const rowText = JSON.stringify(row).toLowerCase();\n\n  const keywordMatch =\n    keywords.length === 0 || keywords.some(k => rowText.includes(k));\n\n  let priceMatch = true;\n  if (priceRange) {\n    // Check both 'Taneira Price' and generic 'Price' columns\n    let price = parseFloat(row[\"Taneira Price\"]) || parseFloat(row[\"Price\"]) || parseFloat(row[\"MRP\"]);\n    if (!isNaN(price)) {\n      priceMatch = price >= priceRange.min && price <= priceRange.max;\n    }\n  }\n\n  return keywordMatch && priceMatch;\n});\n\n/* -------------------- OUTPUT -------------------- */\n\nif (needsAggregation) {\n  const summary = {};\n  \n  // Dynamic Summary: If user mentions a column name, summarize that column\n  // Otherwise, default to \"Reason for Non Purchase\"\n  const columnHeaders = allData.length > 0 ? Object.keys(allData[0].json) : [];\n  let columnToSummarize = \"Reason for Non Purchase\"; \n  \n  for (const header of columnHeaders) {\n      if (userQuestion.includes(header.toLowerCase())) {\n          columnToSummarize = header;\n          break;\n      }\n  }\n\n  filtered.forEach(item => {\n    const val = item.json[columnToSummarize] || \"Not Specified\";\n    summary[val] = (summary[val] || 0) + 1;\n  });\n\n  return [{\n    json: {\n      type: \"aggregation\",\n      queryFocus: columnToSummarize,\n      totalRecordsInFile: allData.length,\n      matchedRecords: filtered.length,\n      dataSummary: summary, \n      keywords,\n      priceRange\n    }\n  }];\n}\n\n/* limit data to avoid rate limits (429 errors) */\nconst MAX_RESULTS = 10;\n\n// Returns ALL columns for the top 10 matches\nconst safeResults = filtered.slice(0, MAX_RESULTS).map(item => item.json);\n\nreturn [{\n  json: {\n    type: \"search\",\n    totalRecords: allData.length,\n    matchedRecords: filtered.length,\n    returnedRecords: safeResults.length,\n    keywords,\n    priceRange,\n    results: safeResults\n  }\n}];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "1222d434-9a9a-4149-9c6c-2ab181649f6c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sareechatbot",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        0
+      ],
+      "id": "eb2259fe-0801-4dae-a7c1-290767ed3629",
+      "name": "Webhook",
+      "webhookId": "76583e9a-0a59-40e3-91c7-54c8cdf5414e"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Safely read AI Agent output\nconst input = $input.first().json;\n\n// AI Agent may return text in different keys depending on model\nconst aiResponse =\n  input.output ||\n  input.text ||\n  input.response ||\n  JSON.stringify(input);\n\n// Return clean final response\nreturn [{\n  json: {\n    status: \"success\",\n    response: aiResponse,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        -16
+      ],
+      "id": "30852b63-a26f-4625-b1e0-4b98ce16cfdb",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"answer\": {{ JSON.stringify($json.response) }},\n  \"timestamp\": {{ JSON.stringify($json.timestamp) }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1472,
+        -16
+      ],
+      "id": "dcc22db4-8cb6-49bc-b465-c433dea50114",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "31724c44-4971-4fc1-8b9a-b2da896bc5c0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cc7ef45e480ca823e24fb0ce3d7be82e5a67c3a6b32b0ed7a5c901b692b7585a"
+  },
+  "id": "7PZZFNubgB8LPEWD",
+  "tags": []
+}
