@@ -1,6 +1,6 @@
 <!-- Custom Boutique Chatbot Illustration Header Banner -->
 <p align="center">
-  <img src="project_banner.png" width="100%" height="220" style="object-fit: cover; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+  <img src="project_banner.png" width="100%" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
 </p>
 
 <!-- Interactive Status & Technology Badges -->
@@ -26,14 +26,6 @@
   <a href="#usage">Usage</a> •
   <a href="#folder-structure">Folder Structure</a>
 </p>
-
-## Interactive Demo
-
-<p align="center">
-  <img src="demo.gif" alt="Application Execution Demonstration" width="100%" height="280" style="object-fit: cover; border-radius: 8px; border: 1px solid #eaeaea;" />
-</p>
-
-*Note: To display your custom live chatbot walkthrough here, record a brief screencast of your browser using a tool like ScreenToGif, save it as `demo.gif`, and place it in the root folder of this repository.*
 
 ## Description
 
