@@ -1,7 +1,8 @@
-<!-- Custom Boutique Chatbot Illustration Header Banner -->
+<!-- Header Visual Banner with Waving Dynamic SVG Animation -->
 <p align="center">
-  <img src="project_banner.png" width="100%" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:EC6FB4,50:C345F1,100:BF8FEF&height=200&section=header&text=Saree%20%26%20Kurta%20AI%20Chatbot&fontSize=38&fontColor=ffffff&animation=fadeIn&fontAlignY=36&desc=Low-Code%20n8n%20Orchestration%20%7C%20Google%20Gemini%20Reasoning&descAlignY=60&descSize=15" width="100%"/>
 </p>
+
 
 <!-- Interactive Status & Technology Badges -->
 <p align="center">
@@ -146,6 +147,5 @@ saree-chatbot/
 ├── n8n/
 │   └── saree_chatbot_workflow.json    # Exported workflow blueprints for n8n
 ├── README.md            # Technical project documentation
-├── bg-texture.jpg       # Interface background style asset
-└── project_banner.png   # Dynamic promotional header graphic
+└── bg-texture.jpg       # Interface background style asset
 ```
