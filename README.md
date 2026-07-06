@@ -1,6 +1,6 @@
 <!-- Header Visual Banner with Waving Dynamic SVG Animation -->
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:EC6FB4,50:C345F1,100:BF8FEF&height=200&section=header&text=Saree%20%26%20Kurta%20AI%20Chatbot&fontSize=38&fontColor=ffffff&animation=fadeIn&fontAlignY=36&desc=Low-Code%20n8n%20Orchestration%20%7C%20Google%20Gemini%20Reasoning&descAlignY=60&descSize=15" width="100%"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:EC6FB4,100:BF8FEF&height=200&section=header&text=AI%20CHATBOT&fontSize=50&fontColor=ffffff&font=Cinzel&animation=fadeIn&fontAlignY=38&desc=Low-Code%20n8n%20Orchestration%20-%20Google%20Gemini%20Reasoning&descAlignY=58&descSize=16" width="100%"/>
 </p>
 
 
